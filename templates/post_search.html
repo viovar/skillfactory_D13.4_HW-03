@@ -1,0 +1,69 @@
+{% extends 'flatpages/default.html' %}
+
+{% load custom_filters %}
+
+{% load custom_tags %}
+
+{% block title %}
+Search
+{% endblock title %}
+
+{% block content %}
+
+   <h1>Найти статью </h1>
+
+   <form action="" method="get">
+       {{ filterset.form.as_p }}
+       <input type="submit" value="Найти" />
+   </form>
+
+   <hr>
+   <h2>Всего статей - {{ search|length }}</h2>
+   {% if search %}
+       <table>
+           <tr>
+               <td>Заголовок</td>
+               <td>Дата публикации</td>
+               <td>Превью</td>
+               <td>Автор</td>
+               <td>Категория</td>
+               <td>Тип</td>
+               <td>Рейтинг</td>
+           </tr>
+
+           {% for po in search %}
+           <tr>
+               <td>{{ po.title | truncatewords:4 | censor }}</td>
+               <td>{{ po.dateCreation | date:'d M Y' }}</td>
+               <td>{{ po.text | truncatewords:20 | censor }}</td>
+               <td>{{ po.author.user }}</td>
+               <td>{% for category in po.postCategory.all %}{{ category.name }}{% endfor %}</td>
+               <td>{{ po.categoryType }}</td>
+               <td>{{ po.rating }}</td>
+           </tr>
+           {% endfor %}
+
+       </table>
+   {% else %}
+       <h2>Статей нет!</h2>
+   {% endif %}
+
+   {% if page_obj.has_previous %}
+       <a href="?{% url_replace page=1 %}">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {{ page_obj.number }}
+
+   {% if page_obj.has_next %}
+       <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+{% endblock content %}

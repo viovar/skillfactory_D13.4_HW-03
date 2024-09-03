@@ -1,0 +1,82 @@
+{% extends 'flatpages/default.html' %}
+
+{% load custom_filters %}
+{% load custom_tags %}
+
+
+{% block title %}
+  News
+{% endblock title %}
+
+{% block content %}
+<h1>{{ Новости }}</h1>
+
+<hr>
+
+    {# Теперь будем проверять не request.user.is_authenticated, а конкретные права #}
+    {% if perms.news.add_post %}
+    <a href="{% url 'post_create' %}">Добавить статью</a>
+    {% endif %}
+
+{% if posts %}
+
+<div class="list-group">
+    <br>
+    {% for new in posts %}
+    <a href="{{ new.id }}" class="list-group-item list-group-item-action">
+        <h3 style="..."><span
+                style="...">{{ new.title }}</span></h3>
+        <h6 style="..."><span
+                style="...">Дата публикации: {{ new.dateCreation | date:'d M Y h:m:s' }}</span></h6>
+        <h5 style="...">{{ new.text | truncatewords:20 }}</h5>
+        <h6 style="..."><span
+                style="...">Автор: {{ new.author.user }}</span></h6>
+        <h6 style="..."><span
+                style="...">Категории: </span>
+            {% for cat in new.postCategory.all %}
+                <a href="{% url 'category_list' cat.id %}">{{ cat }}</a>
+            {% endfor %}
+        </h6>
+    </a>
+
+    {% endfor%}
+</div>
+{% else %}
+<h2>Ждем свежие новости</h2>
+{% endif %}
+<!--добавляем пагинацию-->
+
+   {# Информация о предыдущих страницах #}
+ {% if page_obj.has_previous %}
+       {# Для каждой ссылки пагинации указываем обработку через новый тег #}
+       <a href="?{% url_replace page=1 %}">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?{% url_replace page=page_obj.previous_page_number %}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {{ page_obj.number }}
+
+   {% if page_obj.has_next %}
+       <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
+   {# Информация о текущей странице #}
+<!--   {{ page_obj.number }}-->
+
+   {# Информация о следующих страницах #}
+<!--   {% if page_obj.has_next %}-->
+<!--       <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>-->
+<!--       {% if paginator.num_pages != page_obj.next_page_number %}-->
+<!--           ...-->
+<!--           <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>-->
+<!--       {% endif %}-->
+<!--   {% endif %}-->
+
+
+{% endblock content %}
